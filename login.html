@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>M.E.U. | Login</title>
+
+<style>
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',Roboto,sans-serif; }
+:root {
+  --top:#CDE3FB; --bottom:#FFF7EB; --text:#1A1A1A; --muted:#757575;
+  --border:#D1D5DB; --login:#3B1E18; --register:#2E5339; --notice:#F5F1EB;
+}
+body { min-height:100vh; display:flex; flex-direction:column; background:#fff; color:var(--text); }
+
+/* HEADER */
+.login-header { background: linear-gradient(to bottom, var(--top), var(--bottom)); padding:70px 20px; text-align:center; }
+.login-header h1 { font-size:58px; font-weight:900; letter-spacing:2px; }
+.login-header span { display:block; font-size:52px; margin-top:8px; }
+
+/* MAIN */
+.login-main { flex:1; max-width:580px; margin:auto; padding:50px 20px; text-align:center; }
+.instruction-text { color:var(--muted); font-size:15px; margin-bottom:30px; line-height:1.6; }
+.form-group { position:relative; max-width:380px; margin:0 auto 18px; }
+.form-control { width:100%; padding:14px 16px; border:1px solid var(--border); border-radius:12px; font-size:14px; outline:none; transition:.25s; }
+.form-control:focus { border-color:#7BAAE8; box-shadow:0 0 0 3px rgba(123,170,232,.15); }
+.password-toggle { position:absolute; right:14px; top:50%; transform:translateY(-50%); cursor:pointer; font-size:16px; }
+.forgot-password { margin:18px 0 28px; font-size:13px; }
+.forgot-password a { text-decoration:underline; color:inherit; cursor:pointer; }
+.button-group { display:flex; justify-content:center; gap:16px; margin-bottom:25px; flex-wrap:wrap; }
+.btn { border:none; cursor:pointer; padding:13px 28px; border-radius:28px; color:white; font-weight:700; font-size:14px; transition:.25s; }
+.btn:hover { transform:translateY(-2px); opacity:.92; }
+.btn-login { background:var(--login); }
+.btn-register { background:var(--register); }
+
+/* FEEDBACK MESSAGES */
+#authMessage { display:none; margin:20px auto; padding:14px; border-radius:12px; font-size:13px; font-weight:600; max-width:380px; text-align:center; }
+#authMessage.success { display:block; background:#E8F7ED; color:#216E39; border: 1px solid #C3E6CB; }
+#authMessage.error { display:block; background:#FDECEC; color:#B42318; border: 1px solid #F5C6CB; }
+
+/* LOADING SPINNER */
+.btn.loading { pointer-events:none; opacity:.75; }
+.btn.loading::after { content:""; display:inline-block; width:14px; height:14px; margin-left:10px; border:2px solid rgba(255,255,255,.4); border-top:2px solid white; border-radius:50%; animation:spin .8s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* TEXT & NOTICE */
+.terms-text { font-size:13px; margin-bottom:15px; line-height:1.5; }
+.help-link { display:block; max-width:380px; margin:0 auto 35px; text-align:left; font-size:14px; text-decoration:underline; }
+.notice-box { background:var(--notice); padding:22px; border-radius:18px; max-width:500px; margin:auto; display:flex; gap:14px; text-align:left; font-size:13px; line-height:1.7; }
+.notice-icon { font-size:18px; }
+
+/* FOOTER */
+footer { border-top:1px solid #ECECEC; padding:28px 40px; display:flex; justify-content:space-between; align-items:center; }
+.footer-right { display:flex; gap:16px; font-size:20px; }
+.footer-right a { transition:.25s; text-decoration:none; color:inherit; }
+.footer-right a:hover { opacity:.65; }
+
+/* RESPONSIVO */
+@media(max-width:650px) {
+  .login-header h1 { font-size:42px; }
+  .login-header span { font-size:38px; }
+  .button-group { flex-direction:column; }
+  .btn { width:100%; max-width:380px; margin:auto; }
+  footer { flex-direction:column; gap:18px; text-align:center; }
+}
+</style>
+</head>
+<body>
+
+<header class="login-header">
+  <h1>MERCADINHO<span>M.E.U.</span></h1>
+</header>
+
+<main class="login-main">
+  <p class="instruction-text">Digite seu e-mail e senha para iniciar sessão ou criar conta.</p>
+
+  <form id="loginForm" novalidate>
+    <div class="form-group">
+      <input id="email" type="email" class="form-control" placeholder="Digite seu e-mail" autocomplete="email" required>
+    </div>
+    <div class="form-group">
+      <input id="password" type="password" class="form-control" placeholder="Digite sua senha" autocomplete="current-password" required>
+      <span class="password-toggle" id="togglePassword">👁</span>
+    </div>
+
+    <div class="forgot-password">
+      Esqueceu sua senha? <a id="forgotPasswordBtn">Clique aqui</a>
+    </div>
+
+    <div class="button-group">
+      <button type="submit" id="loginBtn" class="btn btn-login">Login</button>
+      <button type="button" id="registerBtn" class="btn btn-register">Criar Conta</button>
+    </div>
+
+    <div id="authMessage"></div>
+  </form>
+
+  <p class="terms-text">Ao continuar, você concorda com as condições de uso e privacidade do M.E.U.</p>
+  <a href="#" class="help-link">Precisa de ajuda?</a>
+
+  <div class="notice-box">
+    <div class="notice-icon">ⓘ</div>
+    <div>
+      Funcionários e gerentes utilizam e-mail institucional.<br>
+      Clientes utilizam e-mail pessoal (ex: @clientemeu.com).
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div>Copyright © 2026 meu.com.br LTDA.</div>
+  <div class="footer-right">
+    <a href="#">📷</a>
+    <a href="#">in</a>
+    <a href="#">𝕏</a>
+  </div>
+</footer>
+
+<script type="module">
+  // 1. Importando SDKs do Firebase v10
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+  import { 
+    getAuth, 
+    signInWithEmailAndPassword, 
+    createUserWithEmailAndPassword, 
+    sendPasswordResetEmail 
+  } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+  import { 
+    getFirestore, 
+    doc, 
+    setDoc, 
+    getDoc,
+    serverTimestamp 
+  } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+  // 2. Configuração do Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyAw8dde4R2USA1GlNe7PvVRknE-VhhwusU",
+    authDomain: "mercadinhomeu-1b712.firebaseapp.com",
+    projectId: "mercadinhomeu-1b712",
+    storageBucket: "mercadinhomeu-1b712.firebasestorage.app",
+    messagingSenderId: "677347106817",
+    appId: "1:677347106817:web:5d29d58e4dbe6d4848e000"
+  };
+
+  // Inicializa Firebase
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // 3. Elementos do DOM
+  const form = document.getElementById('loginForm');
+  const emailInput = document.getElementById('email');
+  const passwordInput = document.getElementById('password');
+  const loginBtn = document.getElementById('loginBtn');
+  const registerBtn = document.getElementById('registerBtn');
+  const forgotPasswordBtn = document.getElementById('forgotPasswordBtn');
+  const authMessage = document.getElementById('authMessage');
+  const togglePassword = document.getElementById('togglePassword');
+
+  // Toggle Mostrar Senha
+  togglePassword.addEventListener('click', () => {
+    passwordInput.type = passwordInput.type === 'password' ? 'text' : 'password';
+  });
+
+  // Funções de Feedback Visual
+  function showError(msg) {
+    authMessage.className = 'error';
+    authMessage.textContent = msg;
+  }
+
+  function showSuccess(msg) {
+    authMessage.className = 'success';
+    authMessage.textContent = msg;
+  }
+
+  function clearMessage() {
+    authMessage.className = '';
+    authMessage.style.display = 'none';
+  }
+
+  // Define a Role (Papel) baseado no e-mail
+  function getRoleFromEmail(email) {
+    const lowerEmail = email.toLowerCase();
+    if (lowerEmail.endsWith('@admmeu.com') || lowerEmail.endsWith('@gerentemeu.com')) return 'gerente';
+    if (lowerEmail.endsWith('@coopmeu.com') || lowerEmail.endsWith('@funcionariomeu.com')) return 'funcionario';
+    return 'cliente'; // Padrão
+  }
+
+  // Função para redirecionar conforme a Role
+  function redirectByRole(role) {
+    setTimeout(() => {
+      if (role === 'gerente') {
+        window.location.href = "gerente.html";
+      } else if (role === 'funcionario') {
+        window.location.href = "funcionario.html";
+      } else {
+        window.location.href = "index.html"; // Cliente vai para a Home
+      }
+    }, 1500);
+  }
+
+  // 4. Lógica de LOGIN
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearMessage();
+    
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
+
+    if (!email || !password) {
+      showError("Por favor, preencha e-mail e senha.");
+      return;
+    }
+
+    loginBtn.classList.add('loading');
+
+    try {
+      // Tenta logar o usuário
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Buscar dados do usuário no Firestore para redirecionar conforme a Role
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      let role = 'cliente'; // Caso não encontre no DB, assume cliente por segurança
+
+      if (userDoc.exists()) {
+        role = userDoc.data().role || 'cliente';
+      }
+      
+      showSuccess(`Login realizado com sucesso! Redirecionando...`);
+      
+      // Executa o redirecionamento baseado na role
+      redirectByRole(role);
+
+    } catch (error) {
+      console.error("Erro no Login:", error);
+      // Tratamento de erros amigável em PT-BR
+      if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+        showError("E-mail ou senha incorretos.");
+      } else {
+        showError("Erro ao fazer login. Tente novamente mais tarde.");
+      }
+    } finally {
+      loginBtn.classList.remove('loading');
+    }
+  });
+
+  // 5. Lógica de REGISTRO (Criar Conta)
+  registerBtn.addEventListener('click', async () => {
+    clearMessage();
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
+
+    if (!email || !password) {
+      showError("Para criar conta, preencha e-mail e senha.");
+      return;
+    }
+    if (password.length < 6) {
+      showError("A senha deve ter pelo menos 6 caracteres.");
+      return;
+    }
+
+    registerBtn.classList.add('loading');
+
+    try {
+      // Cria o usuário no Firebase Auth
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      
+      // Identifica o tipo de usuário pelo formato do e-mail
+      const role = getRoleFromEmail(email);
+
+      // Salva o perfil no Firestore (Coleção 'users') com a Role correspondente
+      await setDoc(doc(db, "users", user.uid), {
+        uid: user.uid,
+        email: user.email,
+        role: role,
+        createdAt: serverTimestamp(),
+        active: true
+      });
+
+      // Transforma o nome da role para exibir de forma simpática na tela
+      const roleLabel = role.charAt(0).toUpperCase() + role.slice(1);
+      showSuccess(`Conta de ${roleLabel} criada com sucesso!`);
+      
+      // Executa o redirecionamento baseado na role
+      redirectByRole(role);
+
+    } catch (error) {
+      console.error("Erro no Registro:", error);
+      if (error.code === 'auth/email-already-in-use') {
+        showError("Este e-mail já está em uso.");
+      } else if (error.code === 'auth/invalid-email') {
+        showError("E-mail inválido.");
+      } else {
+        showError("Erro ao criar conta.");
+      }
+    } finally {
+      registerBtn.classList.remove('loading');
+    }
+  });
+
+  // 6. Lógica de RECUPERAÇÃO DE SENHA
+  forgotPasswordBtn.addEventListener('click', async (e) => {
+    e.preventDefault();
+    clearMessage();
+    const email = emailInput.value.trim();
+
+    if (!email) {
+      showError("Digite seu e-mail no campo acima para redefinir a senha.");
+      return;
+    }
+
+    try {
+      await sendPasswordResetEmail(auth, email);
+      showSuccess("E-mail de redefinição enviado! Verifique sua caixa de entrada.");
+    } catch (error) {
+      console.error("Erro na Redefinição:", error);
+      if (error.code === 'auth/user-not-found') {
+        showError("E-mail não cadastrado.");
+      } else {
+        showError("Erro ao enviar e-mail de redefinição.");
+      }
+    }
+  });
+</script>
+
+</body>
+</html>
