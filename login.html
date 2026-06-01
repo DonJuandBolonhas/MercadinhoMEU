@@ -232,7 +232,7 @@ footer { border-top:1px solid #ECECEC; padding:28px 40px; display:flex; justify-
   // Função para redirecionar conforme a Role
   function redirectByRole(role) {
     setTimeout(() => {
-      if (role === 'gerente') {
+      if (role === 'gerente' || role === 'admin') {
         window.location.href = "gerente.html";
       } else if (role === 'funcionario') {
         window.location.href = "funcionario.html";
