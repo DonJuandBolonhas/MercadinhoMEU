@@ -744,7 +744,7 @@
                     if (userSnap.exists()) {
                         const userData = userSnap.data();
                         
-                        if (userData.role === 'funcionario' || userData.role === 'gerente') {
+                        if (userData.role === 'funcionario' || userData.role === 'admin') {
                             mainContent.style.display = 'block';
                             
                             authLink.textContent = "Sair ➔";
