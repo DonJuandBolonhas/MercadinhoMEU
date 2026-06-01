@@ -9,7 +9,7 @@
 * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',Roboto,sans-serif; }
 :root {
   --top:#CDE3FB; --bottom:#FFF7EB; --text:#1A1A1A; --muted:#757575;
-  --border:#D1D5DB; --login:#3B1E18; --register:#2E5339; --notice:#F5F1EB;
+  --border:#D1D5DB; --login:#386A46; --register:#4A3323; --notice:#F5F1EB;
 }
 body { min-height:100vh; display:flex; flex-direction:column; background:#fff; color:var(--text); }
 
@@ -24,28 +24,84 @@ body { min-height:100vh; display:flex; flex-direction:column; background:#fff; c
 .form-group { position:relative; max-width:380px; margin:0 auto 18px; }
 .form-control { width:100%; padding:14px 16px; border:1px solid var(--border); border-radius:12px; font-size:14px; outline:none; transition:.25s; }
 .form-control:focus { border-color:#7BAAE8; box-shadow:0 0 0 3px rgba(123,170,232,.15); }
-.password-toggle { position:absolute; right:14px; top:50%; transform:translateY(-50%); cursor:pointer; font-size:16px; }
-.forgot-password { margin:18px 0 28px; font-size:13px; }
-.forgot-password a { text-decoration:underline; color:inherit; cursor:pointer; }
-.button-group { display:flex; justify-content:center; gap:16px; margin-bottom:25px; flex-wrap:wrap; }
-.btn { border:none; cursor:pointer; padding:13px 28px; border-radius:28px; color:white; font-weight:700; font-size:14px; transition:.25s; }
-.btn:hover { transform:translateY(-2px); opacity:.92; }
-.btn-login { background:var(--login); }
-.btn-register { background:var(--register); }
+
+/* Olho da Senha */
+.password-toggle { position:absolute; right:14px; top:50%; transform:translateY(-50%); cursor:pointer; font-size:18px; user-select:none; opacity: 0.7; transition: 0.2s; }
+.password-toggle:hover { opacity: 1; }
+#password { padding-right: 40px; }
+
+/* Container para alinhar os botões */
+.form-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+    max-width: 380px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* ================== BOTÃO LOGIN (VERDE) ================== */
+.btn-login {
+    flex: 1;
+    background-color: #386A46;
+    color: #FFFFFF;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 24px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    transition: opacity 0.2s, transform 0.1s;
+}
+
+.btn-login:hover {
+    background-color: #274d32;
+}
+
+.btn-login:active {
+    transform: scale(0.96);
+}
+
+/* =============== BOTÃO CRIAR CONTA (MARROM) =============== */
+.btn-criar-conta {
+    flex: 1;
+    background-color: #4A3323;
+    color: #FFFFFF;
+    text-decoration: none;
+    padding: 12px 20px;
+    border-radius: 24px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.2s, transform 0.1s;
+}
+
+.btn-criar-conta:hover {
+    opacity: 0.85;
+}
+
+.btn-criar-conta:active {
+    transform: scale(0.96);
+}
 
 /* FEEDBACK MESSAGES */
 #authMessage { display:none; margin:20px auto; padding:14px; border-radius:12px; font-size:13px; font-weight:600; max-width:380px; text-align:center; }
-#authMessage.success { display:block; background:#E8F7ED; color:#216E39; border: 1px solid #C3E6CB; }
-#authMessage.error { display:block; background:#FDECEC; color:#B42318; border: 1px solid #F5C6CB; }
+#authMessage.success { background:#E8F7ED; color:#216E39; border: 1px solid #C3E6CB; }
+#authMessage.error { background:#FDECEC; color:#B42318; border: 1px solid #F5C6CB; }
 
 /* LOADING SPINNER */
-.btn.loading { pointer-events:none; opacity:.75; }
-.btn.loading::after { content:""; display:inline-block; width:14px; height:14px; margin-left:10px; border:2px solid rgba(255,255,255,.4); border-top:2px solid white; border-radius:50%; animation:spin .8s linear infinite; }
+.btn-login.loading { pointer-events:none; opacity:.75; }
+.btn-login.loading::after { content:""; display:inline-block; width:14px; height:14px; margin-left:10px; border:2px solid rgba(255,255,255,.4); border-top:2px solid white; border-radius:50%; animation:spin .8s linear infinite; }
 @keyframes spin { to { transform:rotate(360deg); } }
 
 /* TEXT & NOTICE */
-.terms-text { font-size:13px; margin-bottom:15px; line-height:1.5; }
-.help-link { display:block; max-width:380px; margin:0 auto 35px; text-align:left; font-size:14px; text-decoration:underline; }
+.terms-text { font-size:13px; margin-bottom:15px; margin-top:30px; line-height:1.5; }
+.help-link { display:block; max-width:380px; margin:0 auto 35px; text-align:center; font-size:14px; text-decoration:underline; }
 .notice-box { background:var(--notice); padding:22px; border-radius:18px; max-width:500px; margin:auto; display:flex; gap:14px; text-align:left; font-size:13px; line-height:1.7; }
 .notice-icon { font-size:18px; }
 
@@ -59,8 +115,8 @@ footer { border-top:1px solid #ECECEC; padding:28px 40px; display:flex; justify-
 @media(max-width:650px) {
   .login-header h1 { font-size:42px; }
   .login-header span { font-size:38px; }
-  .button-group { flex-direction:column; }
-  .btn { width:100%; max-width:380px; margin:auto; }
+  .form-actions { flex-direction:column; }
+  .btn-login, .btn-criar-conta { width:100%; }
   footer { flex-direction:column; gap:18px; text-align:center; }
 }
 </style>
@@ -72,27 +128,24 @@ footer { border-top:1px solid #ECECEC; padding:28px 40px; display:flex; justify-
 </header>
 
 <main class="login-main">
-  <p class="instruction-text">Digite seu e-mail e senha para iniciar sessão ou criar conta.</p>
+  <p class="instruction-text">Digite seu e-mail e senha para iniciar sessão.</p>
 
-  <form id="loginForm" novalidate>
+  <form id="loginForm">
     <div class="form-group">
-      <input id="email" type="email" class="form-control" placeholder="Digite seu e-mail" autocomplete="email" required>
+        <input type="email" id="email" class="form-control" placeholder="E-mail" required>
     </div>
+    
     <div class="form-group">
-      <input id="password" type="password" class="form-control" placeholder="Digite sua senha" autocomplete="current-password" required>
-      <span class="password-toggle" id="togglePassword">👁</span>
-    </div>
-
-    <div class="forgot-password">
-      Esqueceu sua senha? <a id="forgotPasswordBtn">Clique aqui</a>
-    </div>
-
-    <div class="button-group">
-      <button type="submit" id="loginBtn" class="btn btn-login">Login</button>
-      <button type="button" id="registerBtn" class="btn btn-register">Criar Conta</button>
+        <input type="password" id="password" class="form-control" placeholder="Senha" required>
+        <span class="password-toggle" id="togglePassword">👁️</span>
     </div>
 
     <div id="authMessage"></div>
+
+    <div class="form-actions">
+        <button type="submit" class="btn-login" id="loginBtn">Login</button>
+        <a href="cadastro.html" class="btn-criar-conta">Criar Conta</a>
+    </div>
   </form>
 
   <p class="terms-text">Ao continuar, você concorda com as condições de uso e privacidade do M.E.U.</p>
@@ -121,16 +174,12 @@ footer { border-top:1px solid #ECECEC; padding:28px 40px; display:flex; justify-
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
   import { 
     getAuth, 
-    signInWithEmailAndPassword, 
-    createUserWithEmailAndPassword, 
-    sendPasswordResetEmail 
+    signInWithEmailAndPassword
   } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
   import { 
     getFirestore, 
     doc, 
-    setDoc, 
-    getDoc,
-    serverTimestamp 
+    getDoc 
   } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
   // 2. Configuração do Firebase
@@ -152,39 +201,32 @@ footer { border-top:1px solid #ECECEC; padding:28px 40px; display:flex; justify-
   const form = document.getElementById('loginForm');
   const emailInput = document.getElementById('email');
   const passwordInput = document.getElementById('password');
-  const loginBtn = document.getElementById('loginBtn');
-  const registerBtn = document.getElementById('registerBtn');
-  const forgotPasswordBtn = document.getElementById('forgotPasswordBtn');
-  const authMessage = document.getElementById('authMessage');
   const togglePassword = document.getElementById('togglePassword');
+  const loginBtn = document.getElementById('loginBtn');
+  const authMessage = document.getElementById('authMessage');
 
-  // Toggle Mostrar Senha
+  // Lógica do Olho de Senha (Mostrar/Ocultar)
   togglePassword.addEventListener('click', () => {
-    passwordInput.type = passwordInput.type === 'password' ? 'text' : 'password';
+    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+    passwordInput.setAttribute('type', type);
   });
 
-  // Funções de Feedback Visual
+  // Funções de Feedback Visual - CORRIGIDAS AQUI
   function showError(msg) {
     authMessage.className = 'error';
+    authMessage.style.display = 'block'; // Força a exibição ignorando o CSS base
     authMessage.textContent = msg;
   }
 
   function showSuccess(msg) {
     authMessage.className = 'success';
+    authMessage.style.display = 'block'; // Força a exibição ignorando o CSS base
     authMessage.textContent = msg;
   }
 
   function clearMessage() {
     authMessage.className = '';
-    authMessage.style.display = 'none';
-  }
-
-  // Define a Role (Papel) baseado no e-mail
-  function getRoleFromEmail(email) {
-    const lowerEmail = email.toLowerCase();
-    if (lowerEmail.endsWith('@admmeu.com') || lowerEmail.endsWith('@gerentemeu.com')) return 'gerente';
-    if (lowerEmail.endsWith('@coopmeu.com') || lowerEmail.endsWith('@funcionariomeu.com')) return 'funcionario';
-    return 'cliente'; // Padrão
+    authMessage.style.display = 'none'; // Esconde a div para o novo teste
   }
 
   // Função para redirecionar conforme a Role
@@ -235,93 +277,31 @@ footer { border-top:1px solid #ECECEC; padding:28px 40px; display:flex; justify-
 
     } catch (error) {
       console.error("Erro no Login:", error);
-      // Tratamento de erros amigável em PT-BR
-      if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
-        showError("E-mail ou senha incorretos.");
-      } else {
-        showError("Erro ao fazer login. Tente novamente mais tarde.");
+      
+      // Tratamento de erros específicos do Firebase em PT-BR
+      switch (error.code) {
+        case 'auth/invalid-credential':
+        case 'auth/user-not-found':
+        case 'auth/wrong-password':
+            showError("E-mail ou senha incorretos.");
+            break;
+        case 'auth/invalid-email':
+            showError("O formato do e-mail é inválido.");
+            break;
+        case 'auth/user-disabled':
+            showError("Esta conta foi desativada pelo administrador.");
+            break;
+        case 'auth/too-many-requests':
+            showError("Muitas tentativas falhas. Conta bloqueada temporariamente.");
+            break;
+        case 'auth/network-request-failed':
+            showError("Erro de conexão. Verifique sua internet.");
+            break;
+        default:
+            showError("Erro ao fazer login. Tente novamente mais tarde.");
       }
     } finally {
       loginBtn.classList.remove('loading');
-    }
-  });
-
-  // 5. Lógica de REGISTRO (Criar Conta)
-  registerBtn.addEventListener('click', async () => {
-    clearMessage();
-    const email = emailInput.value.trim();
-    const password = passwordInput.value;
-
-    if (!email || !password) {
-      showError("Para criar conta, preencha e-mail e senha.");
-      return;
-    }
-    if (password.length < 6) {
-      showError("A senha deve ter pelo menos 6 caracteres.");
-      return;
-    }
-
-    registerBtn.classList.add('loading');
-
-    try {
-      // Cria o usuário no Firebase Auth
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-      
-      // Identifica o tipo de usuário pelo formato do e-mail
-      const role = getRoleFromEmail(email);
-
-      // Salva o perfil no Firestore (Coleção 'users') com a Role correspondente
-      await setDoc(doc(db, "users", user.uid), {
-        uid: user.uid,
-        email: user.email,
-        role: role,
-        createdAt: serverTimestamp(),
-        active: true
-      });
-
-      // Transforma o nome da role para exibir de forma simpática na tela
-      const roleLabel = role.charAt(0).toUpperCase() + role.slice(1);
-      showSuccess(`Conta de ${roleLabel} criada com sucesso!`);
-      
-      // Executa o redirecionamento baseado na role
-      redirectByRole(role);
-
-    } catch (error) {
-      console.error("Erro no Registro:", error);
-      if (error.code === 'auth/email-already-in-use') {
-        showError("Este e-mail já está em uso.");
-      } else if (error.code === 'auth/invalid-email') {
-        showError("E-mail inválido.");
-      } else {
-        showError("Erro ao criar conta.");
-      }
-    } finally {
-      registerBtn.classList.remove('loading');
-    }
-  });
-
-  // 6. Lógica de RECUPERAÇÃO DE SENHA
-  forgotPasswordBtn.addEventListener('click', async (e) => {
-    e.preventDefault();
-    clearMessage();
-    const email = emailInput.value.trim();
-
-    if (!email) {
-      showError("Digite seu e-mail no campo acima para redefinir a senha.");
-      return;
-    }
-
-    try {
-      await sendPasswordResetEmail(auth, email);
-      showSuccess("E-mail de redefinição enviado! Verifique sua caixa de entrada.");
-    } catch (error) {
-      console.error("Erro na Redefinição:", error);
-      if (error.code === 'auth/user-not-found') {
-        showError("E-mail não cadastrado.");
-      } else {
-        showError("Erro ao enviar e-mail de redefinição.");
-      }
     }
   });
 </script>

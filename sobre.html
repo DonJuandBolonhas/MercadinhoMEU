@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>M.E.U. - O melhor mercadinho da região</title>
+    <title>Sobre Nós - M.E.U.</title>
     <style>
         /* ================= Reset e Variáveis ================= */
         * {
@@ -20,6 +20,7 @@
             --green-footer: #3A6343;
             --dark: #1A1A1A;
             --border: #EAEAEA;
+            --card-bg: #F4F7FC;
         }
 
         body {
@@ -34,10 +35,9 @@
             transition: .25s;
         }
 
-        /* ================= Wrapper de Fundo ================= */
-        /* Cria o gradiente fluido que engloba do Header até o Hero */
+        /* Wrapper de Fundo fluido para o topo */
         .top-gradient {
-            background: linear-gradient(180deg, var(--bg-blue) 0%, var(--bg-blue) 20%, var(--bg-beige) 100%);
+            background: linear-gradient(180deg, var(--bg-blue) 0%, var(--bg-blue) 30%, #fff 100%);
         }
 
         /* ================= HEADER ================= */
@@ -49,7 +49,7 @@
             position: sticky;
             top: 0;
             z-index: 100;
-            background: var(--bg-blue); /* Fundo sólido ao "grudar" no topo */
+            background: var(--bg-blue);
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
 
@@ -94,122 +94,152 @@
             cursor: pointer;
         }
 
-        /* ================= HERO ================= */
-        .hero {
-            padding: 70px 20px 80px;
+        /* ================= HERO BANNER ================= */
+        .hero-container {
+            padding: 20px 70px 40px;
+            max-width: 1400px;
+            margin: auto;
+        }
+
+        .about-banner {
+            width: 100%;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+
+        .about-banner img {
+            width: 100%;
+            display: block;
+            object-fit: cover;
+        }
+
+        /* ================= SEÇÃO NOSSOS VALORES ================= */
+        .values-section {
+            padding: 60px 70px;
+            max-width: 1200px;
+            margin: auto;
             text-align: center;
         }
 
-        .hero h1 {
-            font-size: 56px;
-            font-weight: 400;
-            line-height: 1.1;
-            margin-bottom: 12px;
+        .values-section h2 {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 40px;
             color: #111;
         }
 
-        .hero strong {
-            font-weight: 800;
-        }
-
-        .hero p {
-            font-size: 17px;
-            color: #444;
-            margin-bottom: 45px;
-        }
-
-        .hero-banner {
-            width: 92%;
-            max-width: 980px;
-            margin: auto;
-            border-radius: 24px;
-            overflow: hidden;
-            box-shadow: 0 15px 40px rgba(0, 0, 0, .10);
-            transition: .35s;
-        }
-
-        .hero-banner:hover {
-            transform: translateY(-6px);
-        }
-
-        .hero-banner img {
-            width: 100%;
-            display: block;
-        }
-
-        /* ================= PRODUTOS ================= */
-        .products-section {
-            padding: 90px 40px;
-            max-width: 1100px;
-            margin: auto;
-        }
-
-        .products-section h2 {
-            font-size: 32px;
-            font-weight: 600;
-            text-align: center;
-            margin-bottom: 50px;
-            color: #222;
-        }
-
-        .products-container {
+        .values-grid {
             display: flex;
-            gap: 60px;
-            align-items: flex-start;
+            gap: 24px;
+            justify-content: space-between;
         }
 
-        .products-image {
-            flex: 1.2;
-        }
-
-        .products-image img {
-            width: 100%;
-            border-radius: 20px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, .06);
-        }
-
-        .products-list {
+        .value-card {
             flex: 1;
+            background: var(--card-bg);
+            padding: 35px 25px;
+            border-radius: 16px;
+            text-align: left;
             display: flex;
             flex-direction: column;
+            gap: 16px;
         }
 
-        .product-item {
-            padding: 18px 0;
-            border-bottom: 1px solid var(--border);
+        .value-card .icon-container {
+            width: 48px;
+            height: 48px;
+            color: #333;
         }
 
-        .product-item:first-child {
-            padding-top: 0;
-        }
-
-        .product-item h3 {
+        .value-card h3 {
             font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 4px;
+            font-weight: 700;
+            color: #111;
         }
 
-        .product-item p {
+        .value-card p {
             font-size: 14px;
-            color: #666;
+            color: #444;
+            line-height: 1.6;
         }
 
-        .btn-catalogo {
-            margin-top: 30px;
-            background: var(--green);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 24px;
+        /* ================= SEÇÃO LOCALIZAÇÃO ================= */
+        .localization-section {
+            padding: 60px 70px 80px;
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        .localization-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 80px;
+        }
+
+        .localization-info {
+            flex: 1;
+        }
+
+        .localization-info h2 {
+            font-size: 42px;
             font-weight: 600;
+            margin-bottom: 24px;
+            color: #111;
+        }
+
+        .localization-info p {
+            font-size: 16px;
+            color: #333;
+            line-height: 1.6;
+            max-width: 400px;
+        }
+
+        .map-box {
+            flex: 1.2;
+            height: 320px;
+            background-color: #E3F2FD;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+        }
+
+        /* ================= SEÇÃO CONTRATAÇÃO ================= */
+        .hiring-section {
+            background-color: #F8F9FA;
+            padding: 60px 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .hiring-section h2 {
+            font-size: 28px;
+            font-weight: 600;
+            color: #111;
+        }
+
+        .btn-whatsapp {
+            background: #000000;
+            color: #ffffff;
+            padding: 12px 28px;
+            border-radius: 30px;
             font-size: 14px;
+            font-weight: 600;
             display: inline-flex;
             align-items: center;
-            width: fit-content;
-            transition: .3s;
+            gap: 8px;
+            transition: background 0.3s, transform 0.2s;
         }
 
-        .btn-catalogo:hover {
-            background: #274d32;
+        .btn-whatsapp:hover {
+            background: #222222;
             transform: translateY(-2px);
         }
 
@@ -220,8 +250,7 @@
             padding: 45px 70px;
             display: flex;
             justify-content: space-between;
-            align-items: flex-end; /* Alinha o conteúdo à base */
-            margin-top: 50px;
+            align-items: flex-end;
         }
 
         .footer-left {
@@ -251,16 +280,6 @@
             display: flex;
             gap: 15px;
             font-size: 18px;
-            font-weight: bold;
-        }
-
-        .social-icons a {
-            background: transparent;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: opacity 0.3s;
         }
 
         .social-icons a:hover {
@@ -277,7 +296,6 @@
                 display: block;
             }
 
-            /* Menu Oculto no Mobile até ser ativado */
             nav {
                 display: none; 
                 flex-direction: column;
@@ -295,17 +313,32 @@
                 display: flex;
             }
 
-            .hero h1 {
-                font-size: 40px;
+            .hero-container {
+                padding: 10px 20px;
             }
 
-            .products-container {
+            .values-section, .localization-section {
+                padding: 40px 20px;
+            }
+
+            .values-grid {
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .localization-container {
                 flex-direction: column;
                 gap: 40px;
+                text-align: left;
             }
 
-            .products-section {
-                padding: 60px 25px;
+            .localization-info h2 {
+                font-size: 32px;
+            }
+
+            .map-box {
+                width: 100%;
+                height: 260px;
             }
 
             footer {
@@ -321,27 +354,17 @@
             }
             
             .footer-right p {
-                display: none; /* Simplifica o mobile como na imagem */
-            }
-        }
-
-        @media(max-width: 550px) {
-            .hero h1 {
-                font-size: 32px;
-            }
-            .hero p {
-                font-size: 15px;
+                display: none;
             }
         }
     </style>
 </head>
 <body>
+
     <div class="top-gradient">
         <header>
             <div class="logo">M.E.U.</div>
-            
             <button class="mobile-menu-btn" id="menuToggle">☰</button>
-
             <nav id="navbar">
                 <a href="index.html">Home</a>
                 <a href="catalogo.html">Catálogo</a>
@@ -351,45 +374,76 @@
             </nav>
         </header>
 
-        <main>
-            <section class="hero">
-                <h1>Seja bem-vindo<br>ao <strong>M.E.U. !</strong></h1>
-                <p>O melhor mercadinho da região!</p>
-                
-                <div class="hero-banner">
-                    <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=900&q=80" alt="Banner M.E.U. Mercadinho">
-                </div>
-            </section>
-        </main>
-    </div> <section class="products-section">
-        <h2>Conheça nossos produtos</h2>
-        
-        <div class="products-container">
-            <div class="products-image">
-                <img src="https://images.unsplash.com/photo-1608686207856-001b95cf60ca?auto=format&fit=crop&w=600&q=80" alt="Cesta de alimentos frescos">
+        <main class="hero-container">
+            <div class="about-banner">
+                <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=80" alt="M.E.U. Mercadinho Banner">
             </div>
+        </main>
+    </div>
+
+    <section class="values-section">
+        <h2>Nossos valores</h2>
+        <div class="values-grid">
             
-            <div class="products-list">
-                <div class="product-item">
-                    <h3>Alimentos</h3>
-                    <p>Frutas, verduras e muito mais</p>
+            <div class="value-card">
+                <div class="icon-container">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M12 2v20M2 12h20"/>
+                        <path d="M12 12m-5 0a5 5 0 1 0 10 0a5 5 0 1 0 -10 0"/>
+                    </svg>
                 </div>
-                <div class="product-item">
-                    <h3>Bebidas</h3>
-                    <p>Água, leite, suco de laranja e muito mais</p>
+                <h3>Qualidade</h3>
+                <p>Oferecer produtos confiáveis e bem selecionados todos os dias.</p>
+            </div>
+
+            <div class="value-card">
+                <div class="icon-container">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M3.6 9h16.8M3.6 15h16.8"/>
+                        <path d="M11.5 3a17 17 0 0 0 0 18M12.5 3a17 17 0 0 1 0 18"/>
+                    </svg>
                 </div>
-                <div class="product-item">
-                    <h3>Casa</h3>
-                    <p>Papel toalha, sabão e muito mais</p>
+                <h3>Proximidade</h3>
+                <p>Atender com respeito, atenção e relacionamento próximo com os clientes.</p>
+            </div>
+
+            <div class="value-card">
+                <div class="icon-container">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 16 16 12 12 8"/>
+                        <line x1="8" y1="12" x2="16" y2="12"/>
+                    </svg>
                 </div>
-                <div class="product-item">
-                    <h3>Roupas</h3>
-                    <p>Camisetas, chinelos e muito mais</p>
-                </div>
-                
-                <a href="catalogo.html" class="btn-catalogo">+ Catálogo</a>
+                <h3>Transparência</h3>
+                <p>Praticar preços justos e agir com honestidade em todas as relações.</p>
+            </div>
+
+        </div>
+    </section>
+
+    <section class="localization-section">
+        <div class="localization-container">
+            <div class="localization-info">
+                <h2>Localização</h2>
+                <p>Estamos localizados Av. das Notas Altas, nº 100, Centro, Maringá/PR - CEP 10000-000.</p>
+            </div>
+            <div class="map-box">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#EA4335"/>
+                    <circle cx="12" cy="9" r="3" fill="#FFF"/>
+                </svg>
             </div>
         </div>
+    </section>
+
+    <section class="hiring-section">
+        <h2>Estamos contratando!</h2>
+        <a href="#" class="btn-whatsapp">
+            <span>•</span> Contato via WhatsApp
+        </a>
     </section>
 
     <footer id="sobre">
@@ -400,7 +454,7 @@
         <div class="footer-right">
             <p>© 2026 - Todos os direitos reservados</p>
             <div class="social-icons">
-                <a href="" title="Instagram"></a>
+                <a href="#" title="Instagram">📷</a>
                 <a href="#" title="LinkedIn">in</a>
                 <a href="#" title="X / Twitter">𝕏</a>
             </div>
@@ -440,24 +494,8 @@
         const authLink = document.getElementById('authLink');
         const navbar = document.getElementById('navbar');
 
-        // Monitora se há um usuário logado
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                // ================= CORREÇÃO DO REDIRECIONAMENTO DE CHECKOUT =================
-                const checkoutData = localStorage.getItem('checkoutData');
-                if (checkoutData) {
-                    try {
-                        const parsedData = JSON.parse(checkoutData);
-                        if (parsedData && parsedData.cart && parsedData.cart.length > 0) {
-                            window.location.href = "checkout.html";
-                            return; 
-                        }
-                    } catch (e) {
-                        console.error("Erro ao ler dados pendentes de checkout:", e);
-                    }
-                }
-                // ============================================================================
-
                 authLink.textContent = "Sair ➔";
                 authLink.href = "#";
 
@@ -476,9 +514,7 @@
 
                     if (userDocSnap.exists()) {
                         const userData = userDocSnap.data();
-                        
                         if (userData.role === 'funcionario' || userData.role === 'admin' || user.email.includes('@coopmeu.com')) {
-                            
                             if(!document.querySelector('a[href="funcionario.html"]')) {
                                 const funcLink = document.createElement('a');
                                 funcLink.href = "funcionario.html";
@@ -496,7 +532,6 @@
                 } catch (error) {
                     console.error("Erro ao validar perfil do usuário:", error);
                 }
-
             } else {
                 authLink.textContent = "Entrar ➔";
                 authLink.href = "login.html";

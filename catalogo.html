@@ -116,6 +116,7 @@
             gap: 10px;
             flex-wrap: wrap;
             justify-content: center;
+            align-items: center;
         }
 
         .cat-btn {
@@ -136,6 +137,34 @@
         }
 
         .cat-btn:hover:not(.active) {
+            background-color: #D0D4DA;
+        }
+
+        /* Novos estilos para os filtros extras e botão + */
+        .extra-filter {
+            display: none;
+        }
+
+        .extra-filter.show {
+            display: inline-block;
+        }
+
+        .btn-toggle-filters {
+            background-color: var(--border-light);
+            color: var(--text-dark);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-toggle-filters:hover {
             background-color: #D0D4DA;
         }
 
@@ -369,7 +398,7 @@
         <nav>
             <a href="index.html">Home</a>
             <a href="catalogo.html">Catálogo</a>
-            <a href="index.html#sobre">Sobre</a>
+            <a href="sobre.html">Sobre</a>
             <a href="carrinho.html" id="cart-nav">Carrinho (0)</a>
             <a href="login.html" id="authLink" class="auth-btn">Entrar ➔</a>
         </nav>
@@ -387,6 +416,12 @@
                 <button class="cat-btn" data-category="Bebidas">Bebidas</button>
                 <button class="cat-btn" data-category="Casa">Casa</button>
                 <button class="cat-btn" data-category="Roupas">Roupas</button>
+                
+                <button class="cat-btn extra-filter" data-category="Higiene">Higiene</button>
+                <button class="cat-btn extra-filter" data-category="Papelaria">Papelaria</button>
+                <button class="cat-btn extra-filter" data-category="Outros">Outros</button>
+
+                <button id="toggleFiltersBtn" class="btn-toggle-filters" title="Mostrar mais filtros">+</button>
             </div>
 
             <div class="search-bar-container">
@@ -448,6 +483,8 @@
         const categoryBtns = document.querySelectorAll('.cat-btn');
         const cartNav = document.getElementById('cart-nav');
         const authLink = document.getElementById('authLink');
+        const toggleFiltersBtn = document.getElementById('toggleFiltersBtn');
+        const extraFilters = document.querySelectorAll('.extra-filter');
 
         // ================= CONTROLE DE SESSÃO & CARRINHO =================
         onAuthStateChanged(auth, async (user) => {
@@ -527,8 +564,6 @@
 
         // ================= ADICIONAR PRODUTO =================
         window.addToCart = async function(productId) {
-            // OBS: A verificação "if (!currentUser) { alert... }" FOI REMOVIDA para permitir visitantes.
-            
             const product = allProducts.find(p => p.id === productId);
             if (!product || !product.available) return;
 
@@ -602,6 +637,7 @@
 
         // ================= RENDER E FILTROS =================
         function setupEventListeners() {
+            // Logica Filtros e Categorias já existente
             categoryBtns.forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     categoryBtns.forEach(b => b.classList.remove('active'));
@@ -610,6 +646,19 @@
                     applyFilters();
                 });
             });
+
+            // Adicionado: Comportamento do Toggle de Filtros (+/-)
+            if (toggleFiltersBtn) {
+                toggleFiltersBtn.addEventListener('click', () => {
+                    let isShowing = false;
+                    extraFilters.forEach(filter => {
+                        filter.classList.toggle('show');
+                        if (filter.classList.contains('show')) isShowing = true;
+                    });
+                    toggleFiltersBtn.textContent = isShowing ? '-' : '+';
+                    toggleFiltersBtn.title = isShowing ? 'Ocultar filtros extras' : 'Mostrar mais filtros';
+                });
+            }
 
             searchInput.addEventListener('input', (e) => {
                 searchQuery = e.target.value.toLowerCase().trim();
