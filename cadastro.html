@@ -214,6 +214,18 @@ footer { border-top:1px solid #ECECEC; padding:28px 40px; display:flex; justify-
     return 'client';
   }
 
+  function redirectByRole(role) {
+    setTimeout(() => {
+      if (role === 'gerente') {
+        window.location.href = "gerente.html";
+      } else if (role === 'funcionario') {
+        window.location.href = "funcionario.html";
+      } else {
+        window.location.href = "index.html"; // Cliente vai para a Home
+      }
+    }, 1500);
+  }
+
   /* SUBMISSÃO DO FORMULÁRIO (INTEGRAÇÃO FIREBASE) */
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -274,7 +286,7 @@ footer { border-top:1px solid #ECECEC; padding:28px 40px; display:flex; justify-
         }
         
         // Se não houver dados de checkout pendentes, vai para a página inicial padrão
-        window.location.href = "index.html"; 
+        redirectByRole(role);
       }, 1500);
 
     } catch (error) {
