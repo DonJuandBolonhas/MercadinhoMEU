@@ -209,8 +209,8 @@ footer { border-top:1px solid #ECECEC; padding:28px 40px; display:flex; justify-
 
   /* DETERMINAR ROLE PELO EMAIL */
   function getRoleFromEmail(email) {
-    if (email.endsWith('@admmeu.com')) return 'admin';
-    if (email.endsWith('@coopmeu.com')) return 'employee';
+    if (email.endsWith('@admmeu.com')) return 'gerente';
+    if (email.endsWith('@coopmeu.com')) return 'funcionario';
     return 'client';
   }
 
