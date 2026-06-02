@@ -518,8 +518,8 @@
         // ================= AUTENTICAÇÃO E ESCUTA REAL-TIME =================
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                document.getElementById('nav-login').innerHTML = 'Minha Conta';
-                document.getElementById('nav-login').href = '#';
+                document.getElementById('nav-login').innerHTML = 'Sair';
+                document.getElementById('nav-login').href = 'login.html';
                 
                 // Conecta uma escuta Real-Time buscando os dados do Usuário
                 const q = query(collection(db, "reservations"), where("userId", "==", user.uid));
