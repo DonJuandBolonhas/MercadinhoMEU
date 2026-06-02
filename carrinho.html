@@ -727,7 +727,8 @@
             elTotal.textContent = formatCurrency(total);
         }
 
-        function goToCheckout() {
+        // 🚨 FUNÇÃO MODIFICADA PARA LIMPAR O CARRINHO 🚨
+        async function goToCheckout() {
             if (cart.length === 0) {
                 alert("Seu carrinho está vazio! Adicione produtos antes de finalizar.");
                 return;
@@ -752,10 +753,24 @@
                 coupon: appliedCoupon
             };
 
+            // 1. Salva as informações necessárias para a tela de checkout funcionar
             localStorage.setItem('checkoutData', JSON.stringify(checkoutData));
             if(inputDate.value) localStorage.setItem('pickupDate', inputDate.value);
             if(inputTime.value) localStorage.setItem('pickupTime', inputTime.value);
 
+            // 2. LIMPEZA TOTAL DO CARRINHO (Local e Firebase)
+            localStorage.removeItem('cart'); // Limpa o carrinho local
+
+            if (currentUser) {
+                try {
+                    const cartRef = doc(db, "carts", currentUser.uid);
+                    await setDoc(cartRef, { items: [] }); // Limpa o carrinho na nuvem (Firestore)
+                } catch (e) {
+                    console.error("Erro ao limpar carrinho no Firestore antes do checkout:", e);
+                }
+            }
+
+            // 3. Redireciona para a página de checkout
             window.location.href = 'checkout.html';
         }
 
