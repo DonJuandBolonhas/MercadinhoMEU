@@ -555,11 +555,10 @@
         <section id="pane-reservas" class="panel active">
             
             <div class="search-area">
-    <span class="search-icon">🔍</span>
-    <input type="text" id="search-input" class="search-input" placeholder="Buscar nº do pedido">
-    <button id="btn-filter" class="btn-filter">Aplicar filtros</button>
-    <button id="btn-clear-filter" class="btn-filter" style="display: none; background-color: var(--btn-orange);">Limpar filtro</button>
-</div>
+                <span class="search-icon">🔍</span>
+                <input type="text" class="search-input" placeholder="Buscar nº do pedido">
+                <button class="btn-filter">Aplicar filtros</button>
+            </div>
             
             <p class="disclaimer-text">*Para alterar status, utilize o botão na listagem abaixo.</p>
 
@@ -744,7 +743,7 @@
                     if (userSnap.exists()) {
                         const userData = userSnap.data();
                         
-                        if (userData.role === 'funcionario' || userData.role === 'admin' || userData.role === 'gerente') {
+                        if (userData.role === 'funcionario' || userData.role === 'gerente') {
                             mainContent.style.display = 'block';
                             
                             authLink.textContent = "Sair ➔";
@@ -931,103 +930,76 @@
             }
         }
 
-        function renderReservations(listToRender = reservationsList) {
+        function renderReservations() {
             ordersListDiv.innerHTML = "";
-
-            if(listToRender.length === 0) {
-                ordersListDiv.innerHTML = `<p style="text-align:center; color:#777; margin-top:20px;">Nenhuma reserva para exibir.</p>`;
-                return;
-            }
-
-            listToRender.forEach((res, index) => {
-                // Configuração visual baseada em status fictício (adapte ao seu banco de dados)
+            
+            reservationsList.forEach((res, index) => {
                 const isCompleted = res.status === 'completed';
-                const statusText = isCompleted ? 'Concluída' : 'Pendente';
-                const iconClass = isCompleted ? 'completed' : 'pending';
-                const iconSymbol = isCompleted ? '✓' : '⌛';
+                const isCancelled = res.status === 'cancelled';
                 
-                // Formatação segura de Data
-                let dateText = "Data não informada";
-                if (res.createdAt) {
-                    const dateObj = res.createdAt.toDate ? res.createdAt.toDate() : new Date(res.createdAt);
-                    dateText = dateObj.toLocaleDateString('pt-BR') + ' às ' + dateObj.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+                let statusText = "Pendente";
+                let statusClass = "pending";
+                let icon = "🕒";
+                let badgeClass = "badge-pink";
+                
+                if (isCompleted) {
+                    statusText = "Concluído";
+                    statusClass = "completed";
+                    icon = "✔";
+                    badgeClass = "badge-green";
+                } else if (isCancelled) {
+                    statusText = "Cancelado";
+                    statusClass = "pending"; 
+                    icon = "✖";
+                    badgeClass = "badge-pink";
                 }
-                
-                // Criação do elemento HTML do Card
-                const card = document.createElement('div');
-                card.className = 'reservation-card';
-                card.innerHTML = `
-                    <div class="card-icon ${iconClass}">
-                        ${iconSymbol}
-                    </div>
-                    <div class="card-content">
-                        <div class="badges-row">
-                            <span class="badge ${isCompleted ? 'badge-green' : 'badge-pink'}">Pedido #${res.id.slice(0, 6).toUpperCase()}</span>
-                            <span class="badge ${isCompleted ? 'badge-green' : 'badge-pink'}">${statusText}</span>
-                        </div>
-                        <div class="card-price">${formatCurrency(res.total || 0)}</div>
-                        <div class="card-date">Realizado em: ${dateText}</div>
-                        <div class="card-actions">
-                            <button class="btn-details" onclick="openDetailsModal(${index})">Ver detalhes</button>
+
+                // Fallback para o nome do cliente
+                const custName = res.customer?.name || res.guestReservationInfo?.name || res.userId || "Cliente";
+
+                const cardHTML = `
+                    <div class="reservation-card">
+                        <div class="card-icon ${statusClass}">${icon}</div>
+                        <div class="card-content">
+                            <div class="badges-row">
+                                <span class="badge ${badgeClass}">${statusText}</span>
+                                <span class="badge" style="background:#E2E8F0; color:#1A1A1A;">#${res.id.slice(0,6).toUpperCase()}</span>
+                            </div>
+                            <div class="card-price">${formatCurrency(res.total || 0)}</div>
+                            <div class="card-date">${custName} • Pedido em: ${formatDateTime(res.createdAt)}</div>
+                            <div class="card-actions">
+                                <button class="btn-details" onclick="openDetailsModal(${index})">Ver detalhes</button>
+                                ${!isCompleted && !isCancelled ? `<button class="btn-status-green" onclick="toggleStatus('${res.id}', '${res.status}')">Marcar como Concluído</button>` : ''}
+                            </div>
                         </div>
                     </div>
                 `;
-                ordersListDiv.appendChild(card);
+                ordersListDiv.insertAdjacentHTML('beforeend', cardHTML);
             });
         }
 
-        // ================= SISTEMA DE FILTRO =================
-        const searchInput = document.getElementById('search-input');
-        const btnFilter = document.getElementById('btn-filter');
-        const btnClearFilter = document.getElementById('btn-clear-filter');
-
-        // Ação: Aplicar Filtro
-        btnFilter.addEventListener('click', () => {
-            const searchTerm = searchInput.value.trim().toLowerCase();
-            
-            if (!searchTerm) {
-                showNotification("Digite um número de pedido válido para buscar.", "warning");
+        window.toggleStatus = async function(reservationId, currentStatus) {
+            if (currentStatus === 'completed') {
+                showNotification("Ação bloqueada. Status 'concluído' é um estado final.", "warning");
+                return; 
+            }
+            if (currentStatus === 'cancelled') {
+                showNotification("Uma reserva cancelada não pode voltar a ficar pendente.", "error");
                 return;
             }
 
-            // Filtra localmente na array que já foi baixada do Firebase
-            const filtered = reservationsList.filter(res => {
-                // Checa se o ID da reserva contém a string digitada (comparação minúscula para ignorar case)
-                return res.id.toLowerCase().includes(searchTerm);
-            });
-            
-            if (filtered.length === 0) {
-                showNotification("Nenhuma reserva encontrada com esse ID.", "error");
+            const newStatus = 'completed';
+
+            try {
+                const docRef = doc(db, "reservations", reservationId);
+                await updateDoc(docRef, { status: newStatus, updatedAt: serverTimestamp() });
+                
+                showNotification("Status alterado para concluído!", "success");
+                loadReservations(); // Atualiza a lista na tela
+            } catch (error) {
+                console.error("Erro ao atualizar status:", error);
+                showNotification("Erro ao atualizar status. Verifique permissões.", "error");
             }
-            
-            renderReservations(filtered);
-            btnClearFilter.style.display = 'inline-block'; // Exibe o botão de limpar
-        });
-
-        // Ação: Limpar Filtro
-        btnClearFilter.addEventListener('click', () => {
-            searchInput.value = ''; // Limpa o input
-            renderReservations(reservationsList); // Renderiza a lista completa novamente
-            btnClearFilter.style.display = 'none'; // Esconde o botão de limpar
-        });
-
-        // ================= FUNÇÕES UTILITÁRIAS =================
-        
-        // Formatar Moeda
-        window.formatCurrency = function(value) {
-            return Number(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-        };
-
-        // Exibir Notificação (Toast)
-        window.showNotification = function(message, type = 'success') {
-            toast.textContent = message;
-            // Limpa classes anteriores e adiciona as novas
-            toast.className = `notification show ${type}`;
-            
-            // Oculta após 3 segundos
-            setTimeout(() => {
-                toast.className = 'notification';
-            }, 3000);
         };
 
         // Adicionar novo produto ao banco de dados
