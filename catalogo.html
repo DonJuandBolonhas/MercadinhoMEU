@@ -140,7 +140,6 @@
             background-color: #D0D4DA;
         }
 
-        /* Novos estilos para os filtros extras e botão + */
         .extra-filter {
             display: none;
         }
@@ -454,7 +453,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-        import { getFirestore, collection, getDocs, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
         
         // 1. Configuração do Firebase
         const firebaseConfig = {
@@ -488,6 +487,12 @@
 
         // ================= CONTROLE DE SESSÃO & CARRINHO =================
         onAuthStateChanged(auth, async (user) => {
+            
+            // Sempre que carregar a página (ou mudar status de login), garante que o carrinho está VAZIO
+            cart = [];
+            localStorage.removeItem('cart');
+            updateCartCounter();
+
             if (user) {
                 currentUser = user; 
                 authLink.textContent = "Sair ➔";
@@ -495,56 +500,23 @@
                 authLink.addEventListener('click', (e) => {
                     e.preventDefault();
                     signOut(auth).then(() => {
-                        localStorage.removeItem('cart'); // Limpa carrinho local ao deslogar
                         window.location.reload();
                     });
                 });
                 
-                // Mesclagem de Carrinho: Se já há itens locais adicionados como visitante, salva na nuvem.
-                loadCartFromLocal();
-                if (cart.length > 0) {
-                    await saveCartToFirestore();
-                } else {
-                    // Se estiver vazio, puxa do banco da nuvem
-                    await loadUserCartFromFirestore();
-                }
+                // Salva o carrinho vazio no Firestore para garantir que também resete na nuvem
+                await saveCartToFirestore();
             } else {
                 currentUser = null;
                 authLink.textContent = "Entrar ➔";
                 authLink.href = "login.html";
-                
-                // Não apaga o carrinho do visitante. Mantém o que tem salvo no localStorage.
-                loadCartFromLocal();
             }
         });
 
         // ================= FUNÇÕES DO CARRINHO =================
-        function loadCartFromLocal() {
-            const storedCart = localStorage.getItem('cart');
-            if (storedCart) {
-                cart = JSON.parse(storedCart);
-            }
-            updateCartCounter();
-        }
-
         function saveCartToLocal() {
             localStorage.setItem('cart', JSON.stringify(cart));
             updateCartCounter();
-        }
-
-        async function loadUserCartFromFirestore() {
-            if (!currentUser) return;
-            try {
-                const cartRef = doc(db, "carts", currentUser.uid);
-                const cartSnap = await getDoc(cartRef);
-                
-                if (cartSnap.exists()) {
-                    cart = cartSnap.data().items || [];
-                    saveCartToLocal(); // Salva os dados baixados localmente
-                }
-            } catch (error) {
-                console.error("Erro ao carregar o carrinho do Firestore:", error);
-            }
         }
 
         async function saveCartToFirestore() {
@@ -637,7 +609,6 @@
 
         // ================= RENDER E FILTROS =================
         function setupEventListeners() {
-            // Logica Filtros e Categorias já existente
             categoryBtns.forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     categoryBtns.forEach(b => b.classList.remove('active'));
@@ -647,7 +618,6 @@
                 });
             });
 
-            // Adicionado: Comportamento do Toggle de Filtros (+/-)
             if (toggleFiltersBtn) {
                 toggleFiltersBtn.addEventListener('click', () => {
                     let isShowing = false;
