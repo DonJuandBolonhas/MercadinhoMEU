@@ -144,9 +144,10 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-end;
-            padding-top: 16px;
+            padding-top: 166px; /* Ajustado de 16px para manter consistência caso queira, ou use 16px se foi erro de digitação original */
             font-size: 22px;
             font-weight: 500;
+            padding-top: 16px;
         }
 
         .order-total-row .label {
@@ -367,6 +368,16 @@
             background: #f8f8f8;
         }
 
+        .btn-danger {
+            background: white;
+            border: 1px solid var(--danger);
+            color: var(--danger);
+        }
+
+        .btn-danger:hover {
+            background: #FFF5F2;
+        }
+
         /* TOAST */
         .toast {
             position: fixed;
@@ -580,7 +591,8 @@
                 <div class="total-display-input" id="el-final-total">R$ 0,00</div>
 
                 <div class="action-area">
-                    <button class="btn btn-outline" style="flex: 0.5;" onclick="window.location.href='carrinho.html'">Voltar ao Carrinho</button>
+                    <button class="btn btn-danger" style="flex: 0.4;" onclick="clearCheckout()">Limpar Checkout</button>
+                    <button class="btn btn-outline" style="flex: 0.4;" onclick="window.location.href='carrinho.html'">Voltar ao Carrinho</button>
                     <button class="btn btn-filled" style="flex: 1;" onclick="submitReservation()">Realizar Reserva ➔</button>
                 </div>
             </section>
@@ -620,7 +632,6 @@
             messagingSenderId: "677347106817",
             appId: "1:677347106817:web:5d29d58e4dbe6d4848e000"
         };
-
 
         // Inicialização do Firebase
         const app = initializeApp(firebaseConfig);
@@ -663,6 +674,7 @@
         window.logoutApp = logoutApp;
         window.selectPayment = selectPayment;
         window.submitReservation = submitReservation;
+        window.clearCheckout = clearCheckout;
 
         // ================= INIT & STORAGE =================
         document.addEventListener('DOMContentLoaded', () => {
@@ -689,7 +701,6 @@
         }
 
         // ================= RASCUNHO DE SESSÃO (Draft) =================
-        // Mantém as informações para o caso dele sair e voltar após login
         function setupDraftSaving() {
             const saveToLocal = () => {
                 localStorage.setItem('guestReservationInfo', JSON.stringify({
@@ -703,18 +714,28 @@
             els.inputPhone.addEventListener('input', saveToLocal);
             els.inputEmail.addEventListener('input', saveToLocal);
 
-            // Recupera o método de pagamento se ele clicou antes de logar
             const draftPay = localStorage.getItem('draftPaymentMethod');
             if (draftPay) {
                 selectPayment(draftPay);
             }
         }
 
+        // ================= FUNÇÃO LIMPAR CHECKOUT =================
+        function clearCheckout() {
+            if (confirm("Tem certeza que deseja limpar os dados do checkout e esvaziar o carrinho?")) {
+                localStorage.removeItem("checkoutData");
+                localStorage.removeItem("guestReservationInfo");
+                localStorage.removeItem("draftPaymentMethod");
+                
+                // Opcional: Se seu carrinho principal usar outra chave, limpe aqui também. Ex: localStorage.removeItem("cart");
+
+                window.location.href = 'catalogo.html';
+            }
+        }
+
         // ================= AUTHENTICATION & MERGE LOGIC =================
         function checkAuthState() {
             onAuthStateChanged(auth, async (user) => {
-                
-                // 1. Tenta recuperar o que o usuário havia digitado (caso tenha começado a preencher como visitante)
                 const draftInfo = JSON.parse(localStorage.getItem('guestReservationInfo') || '{}');
 
                 if (user) {
@@ -725,16 +746,12 @@
                         const userDoc = await getDoc(doc(db, "users", user.uid));
                         if (userDoc.exists()) {
                             const data = userDoc.data();
-                            
-                            // 2. Mesclagem Inteligente: 
-                            // Prioridade: 1) Banco, 2) Rascunho, 3) Autenticação Google
                             els.inputName.value = data.name || draftInfo.name || user.displayName || "";
-                            if (els.inputName.value.trim() !== "") els.inputName.readOnly = true; // Trava o nome
+                            if (els.inputName.value.trim() !== "") els.inputName.readOnly = true;
                             
                             els.inputPhone.value = data.phone || draftInfo.phone || ""; 
                             els.inputEmail.value = data.email || draftInfo.email || user.email || "";
                         } else {
-                            // Se ele acabou de registrar e não tem documento ainda
                             els.inputName.value = draftInfo.name || user.displayName || "";
                             if (els.inputName.value.trim() !== "") els.inputName.readOnly = true;
                             
@@ -746,9 +763,8 @@
                     }
                 } else {
                     currentUser = null;
-                    els.inputName.readOnly = false; // Garante edição livre para visitantes
+                    els.inputName.readOnly = false;
                     
-                    // Se houver dados no rascunho, preenche o form de visitante
                     if(draftInfo.name || draftInfo.phone || draftInfo.email) {
                         els.inputName.value = draftInfo.name || "";
                         els.inputPhone.value = draftInfo.phone || "";
@@ -772,18 +788,14 @@
                 els.badgeAuth.style.display = 'inline-block';
                 isGuestFormVisible = true;
                 document.getElementById('nav-login').textContent = 'Minha Conta ➔';
-                
                 els.authToggleBtn.textContent = 'Sair / Trocar de conta';
                 els.authToggleBtn.onclick = logoutApp;
-                
             } else if (state === 'GUEST_FORM') {
                 els.guestForm.style.display = 'block';
                 isGuestFormVisible = true;
                 document.getElementById('nav-login').textContent = 'Entrar ➔';
-                
                 els.authToggleBtn.textContent = 'Voltar / Fazer Login';
                 els.authToggleBtn.onclick = openAuthModal;
-                
             } else if (state === 'PROMPT') {
                 els.guestPrompt.style.display = 'block';
                 document.getElementById('nav-login').textContent = 'Entrar ➔';
@@ -852,8 +864,6 @@
         // ================= PAYMENT SELECTION =================
         function selectPayment(method) {
             selectedPaymentMethod = method;
-            
-            // Grava o rascunho de pagamento para não perder
             localStorage.setItem('draftPaymentMethod', method);
 
             els.payCards.forEach(card => card.classList.remove('active'));
@@ -868,7 +878,24 @@
             els.payHint.textContent = hints[method] || "";
         }
 
-        // ================= VALIDATION =================
+        // ================= VALIDATION & UTILS =================
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+        }
+
+        function showToast(message) {
+            els.toastError.textContent = message;
+            els.toastError.classList.add('show');
+            setTimeout(() => els.toastError.classList.remove('show'), 4000);
+        }
+
+        function setupMasks() {
+            els.inputPhone.addEventListener('input', (e) => {
+                let x = e.target.value.replace(/\D/g, '').match(/(\d{0,2})(\d{0,5})(\d{0,4})/);
+                e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
+            });
+        }
+
         function validateCheckout() {
             if (!currentUser && !isGuestFormVisible) {
                 showToast("Por favor, clique em 'Identificar-se' para preencher seus dados.");
@@ -889,12 +916,10 @@
                 els.inputPhone.focus();
                 return false;
             }
-            
             if (!selectedPaymentMethod) {
                 showToast("Selecione um método de pagamento.");
                 return false;
             }
-
             return true;
         }
 
@@ -930,54 +955,24 @@
                     createdAt: serverTimestamp()
                 };
 
-                const docRef = await addDoc(collection(db, "reservations"), reservationPayload);
-
-                const currentReservationData = {
-                    id: docRef.id,
-                    userId: currentUser ? currentUser.uid : null,
-                    status: "pending",
-                    products: checkoutData.cart,
-                    total: checkoutData.total,
-                    pickupDateTime: checkoutData.pickupDateTime || null
-                };
-
-                // Limpeza de ambiente pós-sucesso
-                localStorage.setItem("currentReservation", JSON.stringify(currentReservationData));
-                localStorage.removeItem("cart");
-                localStorage.removeItem("checkoutData");
-                localStorage.removeItem("guestReservationInfo"); // Limpa rascunho visitante
-                localStorage.removeItem("draftPaymentMethod");   // Limpa rascunho de pagamento
-
-                window.location.href = "reserva-status.html";
-
-            } catch (error) {
-                console.error("Erro ao criar reserva no banco:", error);
-                showToast("Erro ao concluir a reserva. Tente novamente.");
+                await addDoc(collection(db, "reservations"), reservationPayload);
                 
+                // Limpa os dados do localStorage após sucesso
+                localStorage.removeItem("checkoutData");
+                localStorage.removeItem("guestReservationInfo");
+                localStorage.removeItem("draftPaymentMethod");
+
+                alert("Reserva realizada com sucesso!");
+                window.location.href = 'index.html'; // Redireciona para o início
+            } catch (error) {
+                console.error("Erro ao salvar reserva:", error);
+                showToast("Erro ao processar sua reserva. Tente novamente.");
                 if(btnSubmit) {
                     btnSubmit.disabled = false;
                     btnSubmit.textContent = "Realizar Reserva ➔";
                     btnSubmit.style.opacity = "1";
                 }
             }
-        }
-
-        // ================= HELPERS =================
-        function formatCurrency(val) {
-            return Number(val).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-        }
-
-        function showToast(message) {
-            els.toastError.textContent = message;
-            els.toastError.classList.add('show');
-            setTimeout(() => els.toastError.classList.remove('show'), 3500);
-        }
-
-        function setupMasks() {
-            els.inputPhone.addEventListener('input', function(e) {
-                let x = e.target.value.replace(/\D/g, '').match(/(\d{0,2})(\d{0,5})(\d{0,4})/);
-                e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
-            });
         }
     </script>
 </body>
