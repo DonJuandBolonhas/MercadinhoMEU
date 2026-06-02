@@ -477,7 +477,7 @@
                     if (userDocSnap.exists()) {
                         const userData = userDocSnap.data();
                         
-                        if (userData.role === 'funcionario' || userData.role === 'admin' || user.email.includes('@coopmeu.com')) {
+                        if (userData.role === 'funcionario' || userData.role === 'gerente' || user.email.includes('@coopmeu.com')) {
                             
                             if(!document.querySelector('a[href="funcionario.html"]')) {
                                 const funcLink = document.createElement('a');
@@ -485,7 +485,7 @@
                                 funcLink.textContent = "Painel Funcionário";
 
                                 const pedidosLink = document.createElement('a');
-                                pedidosLink.href = "visupedidos.html";
+                                pedidosLink.href = "funcionario.html";
                                 pedidosLink.textContent = "Gerenciar Pedidos";
 
                                 navbar.insertBefore(funcLink, authLink);
