@@ -497,8 +497,8 @@
         const db = getFirestore(app);
 
         // ================= ESTADO DA APLICAÇÃO =================
-        let activeReservations = []; // Array contendo as reservas mapeadas do Firestore
-        let reservationIdToCancel = null; // Guarda ID temporário da reserva a ser cancelada pelo modal
+        let activeReservations = []; 
+        let reservationIdToCancel = null; 
 
         const statusMap = {
             'pending': { color: 'var(--status-pending)', title: 'Reserva recebida', desc: 'Estamos a separar os seus produtos.', icon: '🕒' },
@@ -522,23 +522,18 @@
                 document.getElementById('nav-login').innerHTML = 'Sair';
                 document.getElementById('nav-login').href = 'login.html';
                 
-                // Conecta uma escuta Real-Time buscando os dados do Usuário
                 const q = query(collection(db, "reservations"), where("userId", "==", user.uid));
                 
                 onSnapshot(q, (snapshot) => {
                     let docsData = snapshot.docs.map(d => ({ dbId: d.id, ...d.data() }));
                     
-                    // Ordenação cronológica via JS (Mais recente primeiro)
                     docsData.sort((a, b) => {
                         const timeA = a.createdAt?.seconds || 0;
                         const timeB = b.createdAt?.seconds || 0;
                         return timeB - timeA;
                     });
 
-                    // MODIFICADO AQUI: Removido o filtro de ".filter". 
-                    // Agora a variável recebe todas as reservas incluindo "completed" e "cancelled"
                     activeReservations = docsData;
-                    
                     renderActiveReservations();
                 }, (error) => {
                     console.error("Erro na escuta das reservas:", error);
@@ -546,33 +541,36 @@
                 });
 
             } else {
-                // Visitante - Recorre ao LocalStorage corporativo
+                // Usuário não logado (Visitante) - Lê primeiro o localStorage para evitar tela em branco
                 const localData = localStorage.getItem("currentReservation");
                 if (localData) {
                     try {
                         const parsedLocal = JSON.parse(localData);
-                        if (parsedLocal.userId) {
-                            localStorage.removeItem("currentReservation");
-                            showEmptyState();
-                            return;
-                        }
-                        
                         const guestDbId = parsedLocal.id || parsedLocal.dbId;
+                        
                         if (guestDbId) {
-                            // Escuta em tempo real a reserva do visitante
-                            onSnapshot(doc(db, "reservations", guestDbId), (docSnap) => {
-                                if (docSnap.exists()) {
-                                    const data = { dbId: docSnap.id, ...docSnap.data() };
-                                    
-                                    // MODIFICADO AQUI: Retirado o filtro para que mesmo concluída
-                                    // ou cancelada, a reserva continue visível para o visitante.
-                                    activeReservations = [data]; 
-                                    
-                                    renderActiveReservations();
-                                } else {
-                                    showEmptyState();
-                                }
-                            });
+                            // 1. Mostra a reserva instantaneamente da memória do navegador (Garante feedback pro visitante)
+                            activeReservations = [parsedLocal];
+                            renderActiveReservations();
+
+                            // 2. Tenta "ouvir" o Firebase em tempo real (se a permissão de leitura permitir)
+                            try {
+                                onSnapshot(doc(db, "reservations", guestDbId), (docSnap) => {
+                                    if (docSnap.exists()) {
+                                        const data = { dbId: docSnap.id, id: docSnap.id, ...docSnap.data() };
+                                        
+                                        activeReservations = [data]; 
+                                        renderActiveReservations();
+                                        
+                                        // Atualiza a memória com o status mais novo (Ex: foi aprovado pelo funcionário)
+                                        localStorage.setItem("currentReservation", JSON.stringify(data));
+                                    }
+                                }, (error) => {
+                                    console.warn("Usuário visitante visualizando em modo estático/local.", error);
+                                });
+                            } catch(e) {
+                                console.log("Fallback estático ativado.");
+                            }
                         } else {
                             showEmptyState();
                         }
@@ -590,7 +588,7 @@
             container.innerHTML = `
                 <div class="empty-state">
                     <h2>Nenhum pedido encontrado</h2>
-                    <p>Você ainda não possui pedidos registrados.</p>
+                    <p>Você ainda não possui pedidos registrados no sistema.</p>
                     <button class="btn btn-filled" onclick="window.location.href='catalogo.html'" style="max-width: 250px; margin: 0 auto;">Ver o Catálogo</button>
                 </div>
             `;
@@ -602,23 +600,30 @@
                 return;
             }
 
-            container.innerHTML = ''; // Limpa contêiner
+            container.innerHTML = ''; 
 
             activeReservations.forEach((res) => {
-                const resId = res.dbId;
+                const resId = res.dbId || res.id;
                 const statusInfo = statusMap[res.status] || statusMap['pending'];
-                const displayId = (res.id || resId).slice(0, 6).toUpperCase();
+                const displayId = String(resId).slice(0, 6).toUpperCase();
                 
-                // Formatação dos Metadados
                 const dataCriacao = formatDate(res.createdAt);
-                const horarioRetirada = res.pickupDateTime ? formatDate(res.pickupDateTime) : 'Imediata';
+                
+                // Formata corretamente a Data de Retirada que veio do checkout
+                let horarioRetirada = 'Imediata';
+                if (res.pickupDateTime && res.pickupDateTime !== "Não agendado") {
+                    horarioRetirada = formatDate(res.pickupDateTime);
+                }
+
                 const metodoPagamento = res.paymentMethod || 'Não definido';
+                
+                // Lê os dados do cliente injetados pelo novo Checkout
                 const custName = res.customer?.name || res.guestInfo?.name || 'Cliente';
                 const custPhone = res.customer?.phone || res.guestInfo?.phone || '';
                 
-                // Compilação dos Itens do carrinho interno
                 const items = res.products || res.cart || [];
                 let productRowsHtml = '';
+                
                 items.forEach(item => {
                     const subtotalItem = item.price * item.quantity;
                     const imgSrc = item.image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=80&q=80';
@@ -634,12 +639,10 @@
                     `;
                 });
 
-                // Compilação dos Passos da Timeline
                 let timelineStepsHtml = '';
                 let currentIndex = timelineSteps.findIndex(s => s.id === res.status);
                 if (currentIndex === -1) currentIndex = 0;
 
-                // Esconder a timeline se estiver cancelado (usando a classe auxiliar do seu CSS)
                 if (res.status === 'cancelled') {
                     timelineStepsHtml = `<div class="timeline-cancelled" style="display:block;">Pedido Cancelado</div>`;
                 } else {
@@ -662,17 +665,14 @@
                     });
                 }
 
-                // Botão de cancelamento visível apenas em estado 'pending'
                 const cancelBtnHtml = res.status === 'pending' 
                     ? `<button class="btn btn-danger" onclick="window.openModal('${resId}')">Cancelar reserva</button>` 
                     : '';
 
-                // Desconto condicional
                 const discountRowHtml = res.discount > 0 
                     ? `<div class="total-row"><span>Desconto</span><span>- ${formatCurrency(res.discount)}</span></div>` 
                     : '';
 
-                // Injeção Estrutural do Card da Reserva
                 const card = document.createElement('div');
                 card.className = 'reservation-card';
                 card.innerHTML = `
@@ -750,6 +750,19 @@
                     updatedAt: serverTimestamp()
                 });
                 window.closeModal();
+                
+                // Se for visitante, temos que forçar a alteração no localstorage também,
+                // caso o snapshot falhe por regras de permissão
+                const localData = localStorage.getItem("currentReservation");
+                if (localData) {
+                    const parsedLocal = JSON.parse(localData);
+                    if (parsedLocal.id === reservationIdToCancel) {
+                        parsedLocal.status = 'cancelled';
+                        localStorage.setItem("currentReservation", JSON.stringify(parsedLocal));
+                        activeReservations = [parsedLocal];
+                        renderActiveReservations();
+                    }
+                }
             } catch (error) {
                 console.error("Erro ao cancelar reserva no Firebase:", error);
                 alert("Não foi possível processar o cancelamento no servidor.");
@@ -764,9 +777,20 @@
         function formatDate(dateValue) {
             if (!dateValue) return '-';
             try {
-                const dateObj = (dateValue.seconds) ? new Date(dateValue.seconds * 1000) : new Date(dateValue);
+                let dateObj;
+                // Formato Firestore Timestamp
+                if (dateValue.seconds) { 
+                    dateObj = new Date(dateValue.seconds * 1000);
+                } 
+                // Formato ISO string (vindo do localStorage) ou numérico
+                else { 
+                    dateObj = new Date(dateValue);
+                }
+                
                 const date = dateObj.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
                 const time = dateObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                
+                if (date === 'Invalid Date') return String(dateValue);
                 return `${date} às ${time}`;
             } catch (e) {
                 return String(dateValue);
