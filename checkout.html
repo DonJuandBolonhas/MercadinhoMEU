@@ -956,15 +956,26 @@
                     createdAt: serverTimestamp()
                 };
 
-                await addDoc(collection(db, "reservations"), reservationPayload);
+                // 1. ALTERAÇÃO: Capturar a referência do documento recém-criado
+                const docRef = await addDoc(collection(db, "reservations"), reservationPayload);
+                
+                // 2. ALTERAÇÃO: Salvar os dados e o ID no LocalStorage para o Visitante conseguir ler
+                const currentRes = {
+                    id: docRef.id,
+                    ...reservationPayload,
+                    // Substitui o timestamp do servidor por uma data local apenas para a tela poder exibir imediatamente
+                    createdAt: new Date().toISOString() 
+                };
+                localStorage.setItem("currentReservation", JSON.stringify(currentRes));
                 
                 // Limpa os dados do localStorage após sucesso
                 localStorage.removeItem("checkoutData");
                 localStorage.removeItem("guestReservationInfo");
                 localStorage.removeItem("draftPaymentMethod");
 
-                alert("Reserva realizada com sucesso!");
-                window.location.href = 'index.html'; // Redireciona para o início
+                // 3. ALTERAÇÃO: Redirecionar para a página de status da reserva
+                window.location.href = 'reserva-status.html'; 
+                
             } catch (error) {
                 console.error("Erro ao salvar reserva:", error);
                 showToast("Erro ao processar sua reserva. Tente novamente.");
