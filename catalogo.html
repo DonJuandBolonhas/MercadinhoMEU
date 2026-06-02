@@ -339,35 +339,55 @@
             filter: grayscale(0.8);
         }
 
-        /* ================= Footer ================= */
-        footer {
-            background-color: var(--green-footer);
-            color: #FFFFFF;
-            padding: 30px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            font-size: 12px;
-        }
-
-        .footer-left p { margin-bottom: 4px; }
-        .footer-right {
-            text-align: right;
+        /* ================= Toasts (Notificações) ================= */
+        #toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
             display: flex;
             flex-direction: column;
-            align-items: flex-end;
+            gap: 10px;
+            z-index: 9999;
+        }
+
+        .toast {
+            padding: 16px 24px;
+            border-radius: 8px;
+            color: #FFFFFF;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: slideIn 0.3s forwards, fadeOut 0.3s forwards 2.7s;
+            display: flex;
+            align-items: center;
             gap: 12px;
         }
-        .social-icons {
-            display: flex;
-            gap: 15px;
-            font-size: 18px;
+
+        .toast.success {
+            background-color: #28a745;
+            border-left: 5px solid #1e7e34;
         }
-        .social-icons a {
-            color: #FFFFFF;
-            transition: opacity 0.3s;
+
+        .toast.error {
+            background-color: #dc3545;
+            border-left: 5px solid #bd2130;
         }
-        .social-icons a:hover { opacity: 0.7; }
+
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+        }
 
         /* ================= Responsividade ================= */
         @media (max-width: 900px) {
@@ -451,6 +471,8 @@
             </div>
         </div>
     </footer>
+
+    <div id="toast-container"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
@@ -555,6 +577,7 @@
                 await setDoc(cartRef, { items: cart }, { merge: true }); 
             } catch (error) {
                 console.error("Erro ao salvar carrinho no Firestore:", error);
+                showToast("Erro ao sincronizar carrinho na nuvem.", "error");
             }
         }
 
@@ -563,33 +586,57 @@
             cartNav.textContent = `Carrinho (${totalItems})`;
         }
 
+        // ================= SISTEMA DE NOTIFICAÇÕES (TOAST) =================
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            toast.className = `toast ${type}`;
+            const icon = type === 'success' ? '✅' : '❌';
+            toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
+            
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
         // ================= ADICIONAR PRODUTO =================
         window.addToCart = async function(productId) {
-            const product = allProducts.find(p => p.id === productId);
-            if (!product || !product.available) return;
+            try {
+                const product = allProducts.find(p => p.id === productId);
+                
+                if (!product || !product.available) {
+                    showToast('Desculpe, este produto está indisponível.', 'error');
+                    return;
+                }
 
-            const existingItem = cart.find(item => item.id === product.id);
-            if (existingItem) {
-                existingItem.quantity += 1;
-            } else {
-                cart.push({
-                    id: product.id,
-                    name: product.name,
-                    price: product.price,
-                    image: product.image,
-                    quantity: 1
-                });
+                const existingItem = cart.find(item => item.id === product.id);
+                if (existingItem) {
+                    existingItem.quantity += 1;
+                } else {
+                    cart.push({
+                        id: product.id,
+                        name: product.name,
+                        price: product.price,
+                        image: product.image,
+                        quantity: 1
+                    });
+                }
+
+                saveCartToLocal();
+
+                if (currentUser) {
+                    await saveCartToFirestore();
+                }
+                
+                showToast(`${product.name} adicionado ao carrinho!`, 'success');
+
+            } catch (error) {
+                console.error("Erro ao adicionar produto:", error);
+                showToast('Ocorreu um erro ao adicionar o produto.', 'error');
             }
-
-            // Sempre salva localmente
-            saveCartToLocal();
-
-            // Sincroniza com a nuvem apenas se estiver logado
-            if (currentUser) {
-                await saveCartToFirestore();
-            }
-            
-            alert(`${product.name} adicionado ao carrinho!`);
         }
 
         window.goToProductDetails = function(productId) {
@@ -638,7 +685,6 @@
 
         // ================= RENDER E FILTROS =================
         function setupEventListeners() {
-            // Logica Filtros e Categorias já existente
             categoryBtns.forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     categoryBtns.forEach(b => b.classList.remove('active'));
@@ -648,7 +694,6 @@
                 });
             });
 
-            // Adicionado: Comportamento do Toggle de Filtros (+/-)
             if (toggleFiltersBtn) {
                 toggleFiltersBtn.addEventListener('click', () => {
                     let isShowing = false;
