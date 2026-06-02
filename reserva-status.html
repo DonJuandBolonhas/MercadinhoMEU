@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>M.E.U. - Minhas Reservas Ativas</title>
+    <title>M.E.U. - Minhas Reservas e Histórico</title>
     <style>
         /* ================= RESET E VARIÁVEIS ================= */
         * {
@@ -451,7 +451,7 @@
     <main>
         <div class="page-header">
             <h1>Acompanhar Pedidos</h1>
-            <p>Veja e gerencie suas reservas em andamento no M.E.U.</p>
+            <p>Veja suas reservas em andamento e o histórico de pedidos no M.E.U.</p>
         </div>
 
         <div id="reservations-container">
@@ -496,7 +496,7 @@
         const db = getFirestore(app);
 
         // ================= ESTADO DA APLICAÇÃO =================
-        let activeReservations = []; // Array contendo as reservas ativas mapeadas do Firestore
+        let activeReservations = []; // Array contendo as reservas mapeadas do Firestore
         let reservationIdToCancel = null; // Guarda ID temporário da reserva a ser cancelada pelo modal
 
         const statusMap = {
@@ -521,22 +521,22 @@
                 document.getElementById('nav-login').innerHTML = 'Minha Conta';
                 document.getElementById('nav-login').href = '#';
                 
-                // Conecta uma escuta Real-Time filtrando apenas as reservas deste Usuário Logado
+                // Conecta uma escuta Real-Time buscando os dados do Usuário
                 const q = query(collection(db, "reservations"), where("userId", "==", user.uid));
                 
                 onSnapshot(q, (snapshot) => {
                     let docsData = snapshot.docs.map(d => ({ dbId: d.id, ...d.data() }));
                     
-                    // Ordenação cronológica via JS (Mais recente primeiro) para evitar dependência de Índices Compostos manuais
+                    // Ordenação cronológica via JS (Mais recente primeiro)
                     docsData.sort((a, b) => {
                         const timeA = a.createdAt?.seconds || 0;
                         const timeB = b.createdAt?.seconds || 0;
                         return timeB - timeA;
                     });
 
-                    // FILTRO REVISADO: Mostra apenas as reservas em andamento ('pending' ou 'approved')
-                    // Desaparece automaticamente da tela quando marcadas como finalizadas ou canceladas
-                    activeReservations = docsData.filter(res => res.status === 'pending' || res.status === 'approved');
+                    // MODIFICADO AQUI: Removido o filtro de ".filter". 
+                    // Agora a variável recebe todas as reservas incluindo "completed" e "cancelled"
+                    activeReservations = docsData;
                     
                     renderActiveReservations();
                 }, (error) => {
@@ -550,7 +550,6 @@
                 if (localData) {
                     try {
                         const parsedLocal = JSON.parse(localData);
-                        // Proteção: Se possui um userId, pertence a uma conta, e não a um Guest real.
                         if (parsedLocal.userId) {
                             localStorage.removeItem("currentReservation");
                             showEmptyState();
@@ -563,11 +562,11 @@
                             onSnapshot(doc(db, "reservations", guestDbId), (docSnap) => {
                                 if (docSnap.exists()) {
                                     const data = { dbId: docSnap.id, ...docSnap.data() };
-                                    if (data.status === 'pending' || data.status === 'approved') {
-                                        activeReservations = [data];
-                                    } else {
-                                        activeReservations = [];
-                                    }
+                                    
+                                    // MODIFICADO AQUI: Retirado o filtro para que mesmo concluída
+                                    // ou cancelada, a reserva continue visível para o visitante.
+                                    activeReservations = [data]; 
+                                    
                                     renderActiveReservations();
                                 } else {
                                     showEmptyState();
@@ -589,8 +588,8 @@
         function showEmptyState() {
             container.innerHTML = `
                 <div class="empty-state">
-                    <h2>Nenhuma reserva ativa</h2>
-                    <p>Você não possui reservas em andamento no momento.</p>
+                    <h2>Nenhum pedido encontrado</h2>
+                    <p>Você ainda não possui pedidos registrados.</p>
                     <button class="btn btn-filled" onclick="window.location.href='catalogo.html'" style="max-width: 250px; margin: 0 auto;">Ver o Catálogo</button>
                 </div>
             `;
@@ -639,23 +638,28 @@
                 let currentIndex = timelineSteps.findIndex(s => s.id === res.status);
                 if (currentIndex === -1) currentIndex = 0;
 
-                timelineSteps.forEach((step, index) => {
-                    let cssClass = 'timeline-step';
-                    let iconContent = '○';
-                    if (index < currentIndex) {
-                        cssClass += ' completed';
-                        iconContent = '✔';
-                    } else if (index === currentIndex) {
-                        cssClass += ' active';
-                        iconContent = '🟢';
-                    }
-                    timelineStepsHtml += `
-                        <div class="${cssClass}">
-                            <div class="step-icon">${iconContent}</div>
-                            <span class="step-label">${step.label}</span>
-                        </div>
-                    `;
-                });
+                // Esconder a timeline se estiver cancelado (usando a classe auxiliar do seu CSS)
+                if (res.status === 'cancelled') {
+                    timelineStepsHtml = `<div class="timeline-cancelled" style="display:block;">Pedido Cancelado</div>`;
+                } else {
+                    timelineSteps.forEach((step, index) => {
+                        let cssClass = 'timeline-step';
+                        let iconContent = '○';
+                        if (index < currentIndex) {
+                            cssClass += ' completed';
+                            iconContent = '✔';
+                        } else if (index === currentIndex) {
+                            cssClass += ' active';
+                            iconContent = '🟢';
+                        }
+                        timelineStepsHtml += `
+                            <div class="${cssClass}">
+                                <div class="step-icon">${iconContent}</div>
+                                <span class="step-label">${step.label}</span>
+                            </div>
+                        `;
+                    });
+                }
 
                 // Botão de cancelamento visível apenas em estado 'pending'
                 const cancelBtnHtml = res.status === 'pending' 
